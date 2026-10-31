@@ -1,0 +1,21 @@
+[project]
+name = "darupiar"
+version = "0.1.0"
+description = "داروپیار - یادآور دارو"
+requires-python = ">=3.10"
+dependencies = [
+  "flet==0.28.3",   # همان نسخه‌ای که روی ویندوز تست می‌کنید را بگذارید
+  "jdatetime",
+  "pyjnius",
+]
+
+[tool.flet]
+product = "داروپیار"
+org = "ir.darupiar"
+company = "Darupiar"
+
+[tool.flet.app]
+module = "app_ui"   # فایل ورودی: app_ui.py
+
+[tool.flet.android.permission]
+"android.permission.POST_NOTIFICATIONS" = true
