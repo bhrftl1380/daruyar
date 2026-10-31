@@ -25,7 +25,7 @@ jobs:
         run: pip install "flet==0.28.3"
 
       - name: Build APK
-        run: flet build apk --yes --verbose
+        run: flet build apk --verbose
 
       - name: Rename APK
         run: |
