@@ -14,7 +14,7 @@ org = "ir.darupiar"
 company = "Darupiar"
 
 [tool.flet.app]
-module = "hello"   # فایل ورودی: app_ui.py
+module = "app_ui"   # فایل ورودی: app_ui.py
 
 [tool.flet.android.permission]
 "android.permission.POST_NOTIFICATIONS" = true
