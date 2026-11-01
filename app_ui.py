@@ -11,7 +11,7 @@ import db
 import schedule_mobile as schedule
 from notify import update_persistent_notification
 
-try:  # تاریخ شمسی؛ اگر نصب نبود تاریخ میلادی نمایش داده می‌شود
+try:  # تاریخ شمسی؛ اگر نصب نبود تاریخ میلادی نمایش داده می‌ش
     import jdatetime
 except ImportError:
     jdatetime = None
@@ -122,3 +122,101 @@ def _main(page: ft.Page):
                             ft.IconButton(
                                 icon=ft.Icons.DELETE_OUTLINE,
                                 on_click=lambda e, mid=med["id"]: on_delete(mid),
+                            ),
+                        ],
+                        tight=True,
+                    ),
+                )
+            )
+        page.update()
+
+    def on_add(e):
+        name = (name_field.value or "").strip()
+        dose = (dose_field.value or "").strip()
+        raw = (times_field.value or "").replace("،", ",")
+        times = [t.strip() for t in raw.split(",") if t.strip()]
+        try:
+            for t in times:
+                datetime.strptime(t, "%H:%M")
+        except ValueError:
+            error_text.value = "فرمت ساعت باید HH:MM باشد"
+            page.update()
+            return
+        if not name or not times:
+            error_text.value = "نام دارو و حداقل یک ساعت لازم است"
+            page.update()
+            return
+        error_text.value = ""
+        if editing["id"] is None:
+            save_medicine(name, dose, times)
+        else:
+            edit_medicine(editing["id"], name, dose, times)
+        reset_form()
+        refresh_list()
+        refresh_status()
+
+    def reset_form():
+        editing["id"] = None
+        name_field.value = dose_field.value = times_field.value = ""
+        add_button.visible = True
+        save_button.visible = False
+        cancel_button.visible = False
+
+    def on_edit(med):
+        editing["id"] = med["id"]
+        name_field.value = med["name"]
+        dose_field.value = med.get("dose", "")
+        times_field.value = ", ".join(med.get("times", []))
+        error_text.value = ""
+        add_button.visible = False
+        save_button.visible = True
+        cancel_button.visible = True
+        page.update()
+
+    def on_cancel(e):
+        reset_form()
+        error_text.value = ""
+        page.update()
+
+    def on_delete(med_id):
+        if editing["id"] == med_id:
+            reset_form()
+        remove_medicine(med_id)
+        refresh_list()
+        refresh_status()
+
+    async def ticker():
+        while True:
+            refresh_status()
+            await asyncio.sleep(30)
+
+    page.add(
+        status_card,
+        ft.Row([name_field, dose_field]),
+        times_field,
+        error_text,
+        ft.Row([add_button, save_button, cancel_button]),
+        ft.Divider(),
+        med_list,
+    )
+    add_button.on_click = on_add
+    save_button.on_click = on_add
+    cancel_button.on_click = on_cancel
+    refresh_list()
+    page.run_task(ticker)
+
+
+def main(page: ft.Page):
+    try:
+        _main(page)
+    except Exception:
+        import traceback
+
+        page.controls.clear()
+        page.add(ft.Text(traceback.format_exc(), selectable=True, size=11))
+        page.update()
+
+
+if __name__ == "__main__":
+    (getattr(ft, "run", None) or ft.app)(main)
+       
