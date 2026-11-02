@@ -207,8 +207,13 @@ def _main(page: ft.Page):
 
 
 def main(page: ft.Page):
+    page.add(ft.Text("در حال بارگذاری دارویار...", size=18))
+    page.update()
     try:
+        page.controls.clear()
         _main(page)
+        page.add(ft.Text("آماده", size=12))
+        page.update()
     except Exception:
         import traceback
 
